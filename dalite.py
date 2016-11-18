@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Uses JSON database dump and log files to create an output csv file containing student response info
 
@@ -17,7 +16,6 @@ def main(db_json_file, logs_directory, output_file):
     '''
     takes as input db json export filename, log directory, and name of csv file to write to
     '''
-
     # load logs
     print "Loading and processing log files"
     sys.stdout.flush()
@@ -57,10 +55,7 @@ def main(db_json_file, logs_directory, output_file):
     # # formatting (e.g. course_axis_url_name or course_id); applied inplace
     applyOutputFormatting(df_responses)
 
-    # # do some custom filtering (e.g. filter out rows with no username info)
-    # filterOutputTable(df_responses)
-
-    # drop responses from test course
+    # custom filtering, e.g. drop responses from test course
     df_responses = df_responses.dropna(subset=['course_id']).query('course_id != "HarvardX/TST-DALITE-NG-1/now"')
 
     df_responses.to_csv(output_file,encoding='utf-8',index=False)
@@ -116,8 +111,6 @@ def groupLogs(logs):
             record['rationales'] = [rationale['id'] for rationale in log['event']['rationales']]
             record['rationale_algorithm_name'] = log['event']['rationale_algorithm']['name']
             record['rationale_algorithm_version'] = log['event']['rationale_algorithm']['version']
-    #     record['log'] = json.dumps(log)
-    #     record_groups[(log[username],logs[question_id])] = []
         
         log_groups[(username,question_id,course_id)].append(record)
 
@@ -185,18 +178,13 @@ def loadLogsFromFiles(directory):
     num_errors = 0
     for filename in os.listdir(directory):
         if not filename.startswith('student.log'):
-            continue
-        # print filename
-        
+            continue       
         with open("{0}/{1}".format(directory,filename)) as f:
             for line in f:
                 try:
                     log = json.loads(line)
                 # error reading line
                 except ValueError:
-                    # print "LOG ERROR"
-                    # print line
-                    pass
                     num_errors += 1
                     
 
@@ -234,9 +222,6 @@ def prepareAnswersTable(df_answers):
     '''
     load answers csv into pandas dataframe and do some formatting
     '''
-    # create df from answer table
-    # df_answers = pd.read_csv(filename)
-    # just keep the necessary columns
     #TODO if other columns (e.g. upvotes, expert) get used, add them back in here
     df_answers = (
         df_answers
@@ -258,8 +243,6 @@ def prepareAnswerChoicesTable(df_answerchoices):
     '''
     load answer choices table into pandas df
     '''
-    # df_answerchoices = pd.read_csv(filename)
-
     # add numeric code for answer choice {1,2} or {1,2,3}
     def add_choiceint(x):
         x['answer_choice'] = range(1,len(x)+1)
@@ -280,9 +263,6 @@ def prepareUsersTable(df_users):
     '''
     load users csv file into pandas df
     '''
-
-    # df_users = pd.read_csv(filename)
-
     df_users = (
         df_users
             # rename lti internal username col for consistency
@@ -297,8 +277,9 @@ def prepareUsersTable(df_users):
 
 
 def prepareQuestionsTable(df_questions):
-    '''load questions csv file into pandas df'''
-    # df_questions = pd.read_csv(filename)
+    '''
+    load questions csv file into pandas df
+    '''
     df_questions = (df_questions
                         # formatting
                         .assign(question_text=lambda x: x.text.apply(lambda x: x.replace('<b>','').replace('</b>','')))
@@ -306,16 +287,6 @@ def prepareQuestionsTable(df_questions):
                         .rename(columns={'pk':'question_id'})
                     )
     return df_questions
-
-
-def getEdxUserTable(filename):
-    '''
-    get edx mapping table for hash_id to username
-    '''
-    ## something like
-    # df_user_id_map = pd.read_csv('csv/user_id_map.csv')
-    # df_user_id_map = df_user_id_map[['hash_id','username']]
-    pass
 
     
 def joinTables(df_loginfo, df_answers, df_questions, df_answerchoices, df_users):
@@ -390,21 +361,6 @@ def applyOutputFormatting(df_answerslogs):
 
     idx = df_answerslogs.course_id.notnull()
     df_answerslogs.ix[idx,'course_id'] = df_answerslogs.ix[idx,'course_id'].apply(formatCourseId)
-
-
-def filterOutputTable(df_answerslogs):
-    '''
-    define custom filtering
-    '''
-
-    # custom filtering and write to csv
-    return (
-        df_answerslogs
-            # drop rows with no user info
-            .dropna(subset=['user_id'])
-            # question_id<9 looks like it was used for platform testing
-            .query('question_id>9')
-     )
 
 
 if __name__ == '__main__':
