@@ -87,9 +87,9 @@ def loadDatabaseTables(db_json_file):
 
 
 def groupLogs(logs):
-    '''
+    """
     go from flat logs array to dict that has (user, question_id) as key, and array of info records as value
-    '''
+    """
     print "...grouping logs"
     sys.stdout.flush()
     log_groups = defaultdict(list)
@@ -130,11 +130,11 @@ def groupLogs(logs):
 
 
 def filterLogGroups(log_groups):
-    '''
+    """
     filter for problem_check duplicates and flatten into single dict
     takes as input a dict of log groups, with keys (username,question_id,course_id) and value = list of dict records
     returns a list of dict records with each dict summarizing info from a log group
-    '''
+    """
     print "...filtering log groups"
     sys.stdout.flush()
     log_groups_filtered = []
@@ -180,9 +180,9 @@ def filterLogGroups(log_groups):
 
 
 def loadLogsFromFiles(directory):
-    '''
+    """
     load log files into one list
-    '''
+    """
     print "...loading log files"
     sys.stdout.flush()
     logs = []
@@ -207,9 +207,9 @@ def loadLogsFromFiles(directory):
 
 
 def getLogInfoTable(directory):
-    '''
+    """
     load logs from file, do some filtering/summarization, and return a pandas df
-    '''
+    """
     # load logs from file
     logs = loadLogsFromFiles(directory)
 
@@ -231,9 +231,9 @@ def getLogInfoTable(directory):
 
 
 def prepareAnswersTable(df_answers):
-    '''
+    """
     load answers csv into pandas dataframe and do some formatting
-    '''
+    """
     #TODO if other columns (e.g. upvotes, expert) get used, add them back in here
     df_answers = (
         df_answers
@@ -252,9 +252,9 @@ def prepareAnswersTable(df_answers):
 
 
 def prepareAnswerChoicesTable(df_answerchoices):
-    '''
+    """
     load answer choices table into pandas df
-    '''
+    """
     # add numeric code for answer choice {1,2} or {1,2,3}
     def add_choiceint(x):
         x['answer_choice'] = range(1,len(x)+1)
@@ -272,9 +272,9 @@ def prepareAnswerChoicesTable(df_answerchoices):
 
 
 def prepareUsersTable(df_users):
-    '''
+    """
     load users csv file into pandas df
-    '''
+    """
     df_users = (
         df_users
             # rename lti internal username col for consistency
@@ -289,9 +289,9 @@ def prepareUsersTable(df_users):
 
 
 def prepareQuestionsTable(df_questions):
-    '''
+    """
     load questions csv file into pandas df
-    '''
+    """
     df_questions = (df_questions
                         # formatting
                         .assign(question_text=lambda x: x.text.apply(lambda x: x.replace('<b>','').replace('</b>','')))
@@ -302,9 +302,9 @@ def prepareQuestionsTable(df_questions):
 
     
 def joinTables(df_loginfo, df_answers, df_questions, df_answerchoices, df_users):
-    '''
+    """
     join all the df tables
-    '''
+    """
     return (
         df_answers
             # join in info from logs (event times, rationales)
@@ -350,24 +350,24 @@ def joinTables(df_loginfo, df_answers, df_questions, df_answerchoices, df_users)
 
 
 def formatCourseAxisUrlName(s):
-    ''' 
+    """ 
     format module id / course axis url name
     assumes something like "block-v1:HarvardX+TST-DALITE-NG-1+now+type@lti+block@609e562e13c74b85912f30fafeeca774" and takes the last part after the '@'
-    '''
+    """
     if s: return s.split('@')[-1]
     
 
 def formatCourseId(s):
-    '''
+    """
     format course id, assumes something like "course-v1:HarvardX+ER22.1x+2015T3"
-    '''
+    """
     if s: return s.replace('course-v1:','').replace('+','/')
 
 
 def applyOutputFormatting(df_answerslogs):
-    '''
+    """
     apply some formatting rules to relevant columns of the output dataframe before writing to csv
-    '''
+    """
     idx = df_answerslogs.course_axis_url_name.notnull()
     df_answerslogs.ix[idx,'course_axis_url_name'] = df_answerslogs.ix[idx,'course_axis_url_name'].apply(formatCourseAxisUrlName)
 
