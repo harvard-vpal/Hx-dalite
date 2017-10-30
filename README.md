@@ -4,6 +4,8 @@ Utility script for processing data from the dalite LTI tool (https://github.com/
 ## About
 dalite.py contains utilities for extracting database tables from the raw database json export, parsing split log files, and combining them into an output table where each row contains data on a student response.
 
+## Requirements
+* pandas (http://pandas.pydata.org/)
 
 ## Basic usage
 
