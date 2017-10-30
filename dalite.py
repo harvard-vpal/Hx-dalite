@@ -380,7 +380,7 @@ if __name__ == '__main__':
     Usage: dalite.py [-h] [--db-json-file DB_JSON_FILE]
                  [--logs-directory LOGS_DIRECTORY] [--output-file OUTPUT_FILE]
 
-    optional arguments:
+    Arguments:
       -h, --help            show this help message and exit
       --db-json-file DB_JSON_FILE
                             .json or .json.gz file containing database table data
@@ -394,9 +394,9 @@ if __name__ == '__main__':
                             "output.csv")
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--db-json-file', help='.json or .json.gz file containing database table data (typically labelled "database-YYYYMMDDTHH:MM:SS.json[.gz]")')
-    parser.add_argument('--logs-directory', help='directory containing log files (containing files typically labelled "student.log-YYYYMMDD")')
-    parser.add_argument('--output-file', help='filename for joined output csv file (e.g. "output.csv")')
+    parser.add_argument('--db-json-file', required=True, help='.json or .json.gz file containing database table data (typically labelled "database-YYYYMMDDTHH:MM:SS.json[.gz]")')
+    parser.add_argument('--logs-directory', required=True, help='directory containing log files (containing files typically labelled "student.log-YYYYMMDD")')
+    parser.add_argument('--output-file', required=True, help='filename for joined output csv file (e.g. "output.csv")')
     args = parser.parse_args()
 
     dalite = Dalite(args.db_json_file, args.logs_directory)
