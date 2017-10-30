@@ -11,58 +11,70 @@ import json
 import os
 from collections import defaultdict
 import sys
+import logging
 
-def main(db_json_file, logs_directory, output_file):
-    '''
-    takes as input db json export filename, log directory, and name of csv file to write to
-    '''
-    # load logs
-    print "Loading and processing log files"
-    sys.stdout.flush()
-    df_loginfo = getLogInfoTable(logs_directory)
 
-    # load database tables
-    print "Loading csv files"
-    sys.stdout.flush()
-    model_records = loadDatabaseTables(db_json_file)
+class Dalite:
+    def __init__(self, db_json_file, logs_directory):
+        """
+        Get database tables
+        """
+        # load database tables
+        self.model_records = loadDatabaseTables(db_json_file)
+        self.df_answers = pd.DataFrame(self.model_records['peerinst.answer'])
+        self.df_answerchoices = pd.DataFrame(self.model_records['peerinst.answerchoice'])
+        self.df_questions = pd.DataFrame(self.model_records['peerinst.question'])
+        self.df_users = pd.DataFrame(self.model_records['auth.user'])
 
-    df_answers = pd.DataFrame(model_records['peerinst.answer'])
-    df_answerchoices = pd.DataFrame(model_records['peerinst.answerchoice'])
-    df_questions = pd.DataFrame(model_records['peerinst.question'])
-    df_users = pd.DataFrame(model_records['auth.user'])
+        # load logs
+        self.df_loginfo = getLogInfoTable(logs_directory)
 
-    df_answers_prepped = prepareAnswersTable(df_answers)
-    df_answerchoices_prepped = prepareAnswerChoicesTable(df_answerchoices)
-    df_questions_prepped = prepareQuestionsTable(df_questions)
-    df_users_prepped = prepareUsersTable(df_users)
+    def write_db_tables(self, output_directory):
+        """
+        Write db tables as csv
+        Arguments:
+            directory: folder to write csv files to
+        """
+        for table in self.model_records:
+            output_file = "{}/{}.csv".format(output_directory, table)
+            self.model_records[table].to_csv(output_file)
 
-    # join everything
-    print "Merging data"
-    sys.stdout.flush()
-    df_master = joinTables(df_loginfo, df_answers_prepped, df_questions_prepped, df_answerchoices_prepped, df_users_prepped)
+    def make_joined_table(self):
+        """
+        Join db tables with log-derived table, then write to output file
+        """
+        df_answers_prepped = prepareAnswersTable(self.df_answers)
+        df_answerchoices_prepped = prepareAnswerChoicesTable(self.df_answerchoices)
+        df_questions_prepped = prepareQuestionsTable(self.df_questions)
+        df_users_prepped = prepareUsersTable(self.df_users)
 
-    # reorder columns
-    df_responses = (
-        df_master[[
-            'course_id','assignment_id','question_id','question_text',
-            'first_answer_choice','first_answer','rationale_id','rationale',
-            'second_answer_choice','second_answer','chosen_rationale_id','chosen_rationale',
-            'rationales','rationale_algorithm_name','rationale_algorithm_version',
-            'problem_show_time','first_check_time','second_check_time','course_axis_url_name','edx_user_hash_id'
-        ]]
-    )
+        # join everything
+        df_master = joinTables(self.df_loginfo, df_answers_prepped, df_questions_prepped, df_answerchoices_prepped, df_users_prepped)
 
-    # # formatting (e.g. course_axis_url_name or course_id); applied inplace
-    applyOutputFormatting(df_responses)
+        # reorder columns
+        df_responses = (
+            df_master[[
+                'course_id','assignment_id','question_id','question_text',
+                'first_answer_choice','first_answer','rationale_id','rationale',
+                'second_answer_choice','second_answer','chosen_rationale_id','chosen_rationale',
+                'rationales','rationale_algorithm_name','rationale_algorithm_version',
+                'problem_show_time','first_check_time','second_check_time','course_axis_url_name','edx_user_hash_id'
+            ]]
+        )
 
-    # custom filtering, e.g. drop responses from test course
-    df_responses = df_responses.dropna(subset=['course_id']).query('course_id != "HarvardX/TST-DALITE-NG-1/now"')
+        # # formatting (e.g. course_axis_url_name or course_id); applied inplace
+        applyOutputFormatting(df_responses)
 
-    df_responses.to_csv(output_file,encoding='utf-8',index=False)
-    print "Complete: Wrote to {}".format(output_file)
+        # custom filtering, e.g. drop responses from test course
+        df_responses = df_responses.dropna(subset=['course_id']).query('course_id != "HarvardX/TST-DALITE-NG-1/now"')
+
+        return df_responses
 
 
 def loadDatabaseTables(db_json_file):
+    """
+    Convert json file containing database table data to dataframes
+    """
     with open(db_json_file, 'rb') as f:
         records = json.load(f)
         
@@ -367,5 +379,7 @@ if __name__ == '__main__':
     db_json_file = sys.argv[1]
     logs_directory = sys.argv[2]
     output_file = sys.argv[3]
-    main(db_json_file, logs_directory, output_file)
+
+    dalite = Dalite(db_json_file, logs_directory)
+    dalite.make_joined_table().to_csv(output_file, index=False, encoding='utf-8')
 
