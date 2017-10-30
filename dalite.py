@@ -12,7 +12,7 @@ import os
 from collections import defaultdict
 import sys
 import logging
-
+import argparse
 
 class Dalite:
     def __init__(self, db_json_file, logs_directory):
@@ -376,10 +376,29 @@ def applyOutputFormatting(df_answerslogs):
 
 
 if __name__ == '__main__':
-    db_json_file = sys.argv[1]
-    logs_directory = sys.argv[2]
-    output_file = sys.argv[3]
+    """
+    Usage: dalite.py [-h] [--db-json-file DB_JSON_FILE]
+                 [--logs-directory LOGS_DIRECTORY] [--output-file OUTPUT_FILE]
 
-    dalite = Dalite(db_json_file, logs_directory)
-    dalite.make_joined_table().to_csv(output_file, index=False, encoding='utf-8')
+    optional arguments:
+      -h, --help            show this help message and exit
+      --db-json-file DB_JSON_FILE
+                            .json or .json.gz file containing database table data
+                            (typically labelled "database-
+                            YYYYMMDDTHH:MM:SS.json[.gz]")
+      --logs-directory LOGS_DIRECTORY
+                            directory containing log files (containing files
+                            typically labelled "student.log-YYYYMMDD")
+      --output-file OUTPUT_FILE
+                            filename for joined output csv file (e.g.
+                            "output.csv")
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--db-json-file', help='.json or .json.gz file containing database table data (typically labelled "database-YYYYMMDDTHH:MM:SS.json[.gz]")')
+    parser.add_argument('--logs-directory', help='directory containing log files (containing files typically labelled "student.log-YYYYMMDD")')
+    parser.add_argument('--output-file', help='filename for joined output csv file (e.g. "output.csv")')
+    args = parser.parse_args()
+
+    dalite = Dalite(args.db_json_file, args.logs_directory)
+    dalite.make_joined_table().to_csv(args.output_file, index=False, encoding='utf-8')
 
