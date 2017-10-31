@@ -195,12 +195,11 @@ def loadLogsFromFiles(directory):
             for line in f:
                 try:
                     log = json.loads(line)
+                    logs.append(log)
                 # error reading line
                 except ValueError:
                     num_errors += 1
-                    
-
-                logs.append(log)
+                
     print "...number of log errors: {}".format(num_errors)
     sys.stdout.flush()
     return logs
