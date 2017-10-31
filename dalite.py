@@ -76,7 +76,11 @@ def loadDatabaseTables(db_json_file):
     """
     Convert json file containing database table data to dataframes
     """
-    with open(db_json_file, 'rb') as f:
+    if db_json_file.endswith('.gz'):
+        opener = gzip.open
+    else:
+        opener = open
+    with opener(db_json_file, 'rb') as f:
         records = json.load(f)
         
     model_records = defaultdict(list)
