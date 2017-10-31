@@ -11,7 +11,7 @@ dalite.py contains utilities for extracting database tables from the raw databas
 
 1. Download the latest json.gz data file (typically named with the pattern `database-YYYYMMDDTHH:MM:SS.json[.gz]`)
 
-2. Download all log files (typically named with the pattern `student.log-YYYYMMDD`)
+2. Download all log files (typically named with the pattern `student.log-YYYYMMDD.gz`)
 
 3. Run dalite.py, specifying the json data file, the logs directory containing the student log files, and the output csv file to write to.
 
