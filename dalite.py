@@ -13,6 +13,7 @@ from collections import defaultdict
 import sys
 import logging
 import argparse
+import gzip
 
 class Dalite:
     def __init__(self, db_json_file, logs_directory):
@@ -192,7 +193,12 @@ def loadLogsFromFiles(directory):
         # assumes that log file names start with the prefix "student.log ..."
         if not filename.startswith('student.log'):
             continue
-        with open("{0}/{1}".format(directory,filename)) as f:
+        # unzip file on open if needed
+        if filename.endswith('.gz'):
+            opener = gzip.open
+        else:
+            opener = open
+        with opener("{0}/{1}".format(directory,filename),'rb') as f:
             for line in f:
                 try:
                     log = json.loads(line)
