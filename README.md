@@ -35,5 +35,5 @@ Arguments:
 
 Example usage:
 ```
-python dalite.py --database-json data/db/database-20160826T06\:43\:18.json --logs-directory data/logs --output-file output/output.csv
+python dalite.py --database-json data/db/database-20160826T06:43:18.json --logs-directory data/logs --output-file output/output.csv
 ```
