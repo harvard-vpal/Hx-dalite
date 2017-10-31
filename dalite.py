@@ -189,8 +189,9 @@ def loadLogsFromFiles(directory):
     # track number of line errors when loading logs
     num_errors = 0
     for filename in os.listdir(directory):
+        # assumes that log file names start with the prefix "student.log ..."
         if not filename.startswith('student.log'):
-            continue       
+            continue
         with open("{0}/{1}".format(directory,filename)) as f:
             for line in f:
                 try:
