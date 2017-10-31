@@ -16,12 +16,12 @@ dalite.py contains utilities for extracting database tables from the raw databas
 3. Run dalite.py, specifying the json data file, the logs directory containing the student log files, and the output csv file to write to.
 
 ```
-usage: dalite.py [-h] --db-json-file DB_JSON_FILE --logs-directory
-                 LOGS_DIRECTORY --output-file OUTPUT_FILE
+Usage: dalite.py [-h] [--database-json DATABASE_JSON]
+             [--logs-directory LOGS_DIRECTORY] [--output-file OUTPUT_FILE]
 
-arguments:
+Arguments:
   -h, --help            show this help message and exit
-  --db-json-file DB_JSON_FILE
+  --database-json DATABASE_JSON
                         .json or .json.gz file containing database table data
                         (typically labelled "database-
                         YYYYMMDDTHH:MM:SS.json[.gz]")
@@ -35,5 +35,5 @@ arguments:
 
 Example usage:
 ```
-python dalite.py --db-json-file database-20160826T06\:43\:18.json --logs-directory ./logs --output-file output.csv
+python dalite.py --database-json data/db/database-20160826T06\:43\:18.json --logs-directory data/logs --output-file output/output.csv
 ```
